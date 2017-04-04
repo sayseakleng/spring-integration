@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"    
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:int-ip="http://www.springframework.org/schema/integration/ip"
+       xmlns:context="http://www.springframework.org/schema/context"    
+       xmlns:int="http://www.springframework.org/schema/integration"    
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+                           http://www.springframework.org/schema/integration/ip http://www.springframework.org/schema/integration/ip/spring-integration-ip.xsd
+                           http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration-4.3.xsd">
+	
+	
+	<int:transformer id="testTransformer" 
+		ref="order1ToOrder2Transformer" 
+		input-channel="inputChannel"
+        output-channel="outputChannel2"/>
+        
+    <bean id="order1ToOrder2Transformer" class="com.kdemo.spring.integration.transformer.Order1ToOrder2Transformer"/>
+    
+	
+	<int:router input-channel="inputChannel" 
+		expression="payload.date" default-output-channel="outputChannel2">
+		<int:mapping value="null" channel="outputChannel1"/>
+	</int:router>
+	<int:channel id="inputChannel"/>
+		
+	<int:channel id="outputChannel1">
+		<int:queue capacity="10"/>
+	</int:channel>
+	
+	<int:channel id="outputChannel2">
+		<int:queue capacity="10"/>
+	</int:channel>
+	
+</beans>

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"    
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:int-ip="http://www.springframework.org/schema/integration/ip"
+       xmlns:context="http://www.springframework.org/schema/context"    
+       xmlns:int="http://www.springframework.org/schema/integration"    
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+                           http://www.springframework.org/schema/integration/ip http://www.springframework.org/schema/integration/ip/spring-integration-ip.xsd
+                           http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration-4.3.xsd">
+
+	<bean id="orderService" class="com.kdemo.spring.integration.filter.OrderService"/>
+	
+
+	<int:channel id="inputChannel"/>
+		
+	<int:channel id="outputChannel">
+		<int:queue capacity="10"/>
+	</int:channel>
+	
+	<bean id="orderFilter" class="com.kdemo.spring.integration.filter.OrderFilter"/>
+	
+<!-- 	option 1 -->
+<!-- 	<int:chain input-channel="inputChannel" output-channel="outputChannel"> -->
+<!-- 		<int:filter ref="orderFilter"/> -->
+<!-- 	</int:chain> -->
+	
+<!-- 	option 2 -->
+<!-- 	<int:filter -->
+<!-- 		input-channel="inputChannel" -->
+<!-- 		output-channel="outputChannel" -->
+<!-- 		ref="orderFilter"/> -->
+
+<!-- 	option 3 -->
+	<int:filter
+		input-channel="inputChannel"
+		output-channel="outputChannel"
+		expression="payload.orderDate != null"/>
+	
+	<int:service-activator 
+		ref="orderService"
+		method="order" 
+		input-channel="inputChannel"
+		output-channel="outputChannel" requires-reply="false"/>
+		
+	<!-- option 1 -->
+	<int:service-activator 
+		ref="orderService"
+		method="receive" 
+		input-channel="outputChannel">
+		<int:poller fixed-delay="1"/>
+	</int:service-activator>
+	
+</beans>
